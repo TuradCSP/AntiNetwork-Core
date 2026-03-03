@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntiNetwork | Web Architecture</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --bg-dark: #0f172a;
+            --text-light: #f8fafc;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Canvas Backgrounds */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #020617, #0f172a, #1e1b4b);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary);
+        }
+
+        /* Main Content */
+        main {
+            padding: 0 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        section {
+            padding: 6rem 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Hero Section */
+        #hero {
+            align-items: center;
+            text-align: center;
+            padding-top: 8rem;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+        }
+
+        .cta-button {
+            padding: 1rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
+        }
+
+        /* Grid Layouts */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        /* Glassmorphism Cards */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        .card p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            padding: 4rem 5%;
+            text-align: center;
+            background: rgba(2, 6, 23, 0.8);
+            border-top: 1px solid var(--glass-border);
+            overflow: hidden;
+            margin-top: 4rem;
+        }
+
+        #footer-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-logo {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .developer-credit {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            section {
+                padding: 4rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <nav>
+        <a href="#" class="logo">AntiNetwork</a>
+        <div class="nav-links">
+            <a href="#fundamentals">Fundamentals</a>
+            <a href="#architecture">Architecture</a>
+            <a href="#security">Security & DevOps</a>
+        </div>
+    </nav>
+
+    <main>
+        <section id="hero">
+            <h1 class="hero-title">Master Web Architecture</h1>
+            <p class="hero-subtitle">Elevate your engineering skills with deep dives into modern web systems, scalable infrastructure, and advanced design patterns.</p>
+            <a href="#fundamentals" class="cta-button">Explore Concepts</a>
+        </section>
+
+        <section id="fundamentals">
+            <h2 class="section-title">Core Fundamentals</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>DOM Architecture</h3>
+                    <p>Understand the Document Object Model tree structure, render paths, reflows, repaints, and how the browser constructs the CSSOM to paint pixels to the screen efficiently.</p>
+                </div>
+                <div class="card">
+                    <h3>Asynchronous JS</h3>
+                    <p>Deep dive into the Event Loop, Microtask vs Macrotask queues, Promises, async/await, and how JavaScript handles concurrency in a single-threaded environment.</p>
+                </div>
+                <div class="card">
+                    <h3>State Management</h3>
+                    <p>Explore client-side state paradigms. From local component state to global stores (Redux, Zustand), and server-state synchronization (React Query, SWR).</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture">
+            <h2 class="section-title">System Architecture</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Microservices</h3>
+                    <p>Decouple monolithic applications into independently deployable services. Learn about inter-service communication, event-driven architectures, and service mesh.</p>
+                </div>
+                <div class="card">
+                    <h3>API Paradigms</h3>
+                    <p>Compare RESTful design principles with GraphQL's flexible querying. Understand gRPC for high-performance internal microservice communication.</p>
+                </div>
+                <div class="card">
+                    <h3>Load Balancing</h3>
+                    <p>Scale horizontally with Layer 4 and Layer 7 load balancing. Explore algorithms like Round Robin, Least Connections, and IP Hashing to distribute traffic.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="security">
+            <h2 class="section-title">Security & DevOps</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>OWASP Top 10</h3>
+                    <p>Mitigate critical vulnerabilities including SQL Injection, Cross-Site Scripting (XSS), Cross-Site Request Forgery (CSRF), and Broken Access Control.</p>
+                </div>
+                <div class="card">
+                    <h3>JWT Authentication</h3>
+                    <p>Implement stateless authentication using JSON Web Tokens. Understand token structure, signing algorithms, and secure storage mechanisms (HttpOnly cookies).</p>
+                </div>
+                <div class="card">
+                    <h3>Docker & CI/CD</h3>
+                    <p>Containerize applications for consistent environments. Automate testing and deployment pipelines using GitHub Actions, Jenkins, or GitLab CI.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <canvas id="footer-canvas"></canvas>
+        <div class="footer-content">
+            <div class="footer-logo">AntiNetwork</div>
+            <p class="developer-credit">Developed by TuradCsp</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Main Background Neural Network Canvas ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+        
+        const mouse = {
+            x: null,
+            y: null,
+            radius: 150
+        };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initParticles();
+        }
+
+        window.addEventListener('resize', resize);
+        
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.baseRadius = Math.random() * 2 + 1;
+                this.radius = this.baseRadius;
+                this.color = Math.random() > 0.5 ? '#6366f1' : '#a855f7';
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update() {
+                // Move
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off edges
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+
+                // Mouse interaction (Repel / Anti-gravity)
+                if (mouse.x != null && mouse.y != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < mouse.radius) {
+                        const forceDirectionX = dx / distance;
+                        const forceDirectionY = dy / distance;
+                        const force = (mouse.radius - distance) / mouse.radius;
+                        const directionX = forceDirectionX * force * 5;
+                        const directionY = forceDirectionY * force * 5;
+                        
+                        this.x -= directionX;
+                        this.y -= directionY;
+                    }
+                }
+
+                this.draw();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let numberOfParticles = (width * height) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function connectParticles() {
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let dx = particles[a].x - particles[b].x;
+                    let dy = particles[a].y - particles[b].y;
+                    let distance = dx * dx + dy * dy;
+
+                    if (distance < 15000) {
+                        let opacity = 1 - (distance / 15000);
+                        ctx.strokeStyle = `rgba(168, 85, 247, ${opacity * 0.5})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animateBg() {
+            requestAnimationFrame(animateBg);
+            ctx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+            }
+            connectParticles();
+        }
+
+        resize();
+        animateBg();
+
+        // --- Footer Rising Magic Dust Canvas ---
+        const footerCanvas = document.getElementById('footer-canvas');
+        const fCtx = footerCanvas.getContext('2d');
+        let fWidth, fHeight;
+        let dustParticles = [];
+
+        function resizeFooter() {
+            const footer = document.querySelector('footer');
+            fWidth = footerCanvas.width = footer.offsetWidth;
+            fHeight = footerCanvas.height = footer.offsetHeight;
+            initDust();
+        }
+
+        window.addEventListener('resize', resizeFooter);
+
+        class Dust {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * fHeight; // Initial random spread
+            }
+
+            reset() {
+                this.x = Math.random() * fWidth;
+                this.y = fHeight + 10;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = Math.random() * -1 - 0.5;
+                this.radius = Math.random() * 2 + 0.5;
+                this.alpha = Math.random() * 0.5 + 0.1;
+                this.fadeRate = Math.random() * 0.005 + 0.001;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.fadeRate;
+
+                if (this.alpha <= 0 || this.y < 0) {
+                    this.reset();
+                }
+
+                fCtx.beginPath();
+                fCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                fCtx.fillStyle = `rgba(192, 132, 252, ${this.alpha})`;
+                fCtx.shadowBlur = 10;
+                fCtx.shadowColor = '#c084fc';
+                fCtx.fill();
+            }
+        }
+
+        function initDust() {
+            dustParticles = [];
+            for (let i = 0; i < 100; i++) {
+                dustParticles.push(new Dust());
+            }
+        }
+
+        function animateDust() {
+            requestAnimationFrame(animateDust);
+            fCtx.clearRect(0, 0, fWidth, fHeight);
+            for (let i = 0; i < dustParticles.length; i++) {
+                dustParticles[i].update();
+            }
+        }
+
+        // Initialize footer canvas after a short delay to ensure layout is complete
+        setTimeout(() => {
+            resizeFooter();
+            animateDust();
+        }, 100);
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
